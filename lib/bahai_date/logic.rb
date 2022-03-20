@@ -16,8 +16,9 @@ module BahaiDate
     #         Latitude: 35° 41' 45.9996", Longitude: 51° 25' 23.0016"
     # Converted to decimal using:
     #         http://transition.fcc.gov/mb/audio/bickel/DDDMMSS-decimal.html
-    TEHRAN_LAT = BigDecimal('35.696111')
-    TEHRAN_LONG = BigDecimal('51.423056')
+    TEHRAN_LAT = BigDecimal('35.696111').freeze
+    TEHRAN_LONG = BigDecimal('51.423056').freeze
+    TEHRAN_TZ = TZInfo::Timezone.get('Asia/Tehran').freeze
 
     # *** Azimuth (for determining sunset times) ***
     # Source: http://www.timeanddate.com/astronomy/about-sun-calculator.html
@@ -26,26 +27,20 @@ module BahaiDate
     #         http://www.satsig.net/degrees-minutes-seconds-calculator.htm
     AZIMUTH = 90.833333
 
-    attr_reader :lat, :lng, :tz
-
-    def initialize(lat:, lng:)
-      raise 'lat is required' if lat.to_d.zero?
-      raise 'lng is required' if lng.to_d.zero?
-      @lat = lat.to_d
-      @lng = lng.to_d
-      @tz = TZInfo::Timezone.get('Asia/Tehran')
-    end
-
     def self.nawruz_for(year)
-      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).nawruz_date year
+      new.nawruz_date year
     end
 
     def self.leap?(year_bahai_era)
-      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).leap? year_bahai_era
+      new.leap? year_bahai_era
     end
 
     def self.twin_holy_days_date(year_bahai_era)
-      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).twin_holy_days_for year_bahai_era
+      new.twin_holy_days_for year_bahai_era
+    end
+
+    def self.sunset_time_for(date, lat:, lng:, tz:)
+      new.sunset_time_for(date, lat:, lng:, tz:)
     end
 
     def nawruz_date(year)
@@ -57,17 +52,21 @@ module BahaiDate
     end
 
     def nawruz_time(year)
-      sunset_time_for(nawruz_date(year))
+      tehran_sunset_time_for nawruz_date(year)
     end
 
-    def sunset_time_for(date)
+    def tehran_sunset_time_for(date)
+      sunset_time_for(date, lat: TEHRAN_LAT, lng: TEHRAN_LONG, tz: TEHRAN_TZ)
+    end
+
+    def sunset_time_for(date, lat:, lng:, tz:)
       calc = SolarEventCalculator.new(date, lat, lng)
       sunset_time = calc.compute_utc_solar_event(AZIMUTH, false)
-      localize(sunset_time.utc)
+      localize(sunset_time.utc, tz:)
     end
 
     def spring_equinox_in_tehran(year)
-      increment_if_after_sunset localize(Astro.date_of_vernal_equinox(year).to_utc)
+      increment_if_after_sunset localize(Astro.date_of_vernal_equinox(year).to_utc, tz: TEHRAN_TZ)
     end
 
     def twin_holy_days_for(year_bahai_era)
@@ -83,7 +82,7 @@ module BahaiDate
     end
 
     def new_moon(lunation)
-      localize(Astro.date_of_moon(lunation, Astro::PhaseNew).to_utc)
+      localize(Astro.date_of_moon(lunation, Astro::PhaseNew).to_utc, tz: TEHRAN_TZ)
     end
 
     def leap?(year_bahai_era)
@@ -105,13 +104,13 @@ module BahaiDate
 
     private
 
-    def localize(time)
+    def localize(time, tz:)
       (tz.utc_to_local(time)).to_time
     end
 
     def increment_if_after_sunset(time)
       date = time.to_date
-      if time > sunset_time_for(date)
+      if time > tehran_sunset_time_for(date)
         date += 1
       end
       date

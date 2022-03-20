@@ -12,8 +12,9 @@ module BahaiDate
     #         http://transition.fcc.gov/mb/audio/bickel/DDDMMSS-decimal.html
     TEHRAN_LAT = BigDecimal('35.696111')
     TEHRAN_LONG = BigDecimal('51.423056')
+    TEHRAN_TZ = 'Asia/Tehran'.freeze
 
-    attr_reader :weekday, :day, :month, :year, :gregorian_date, :lat, :lng
+    attr_reader :weekday, :day, :month, :year, :gregorian_date, :lat, :lng, :tz
 
     def ==(other)
       weekday == other.weekday &&
@@ -25,16 +26,19 @@ module BahaiDate
         lng == other.lng
     end
 
-    def initialize(date: nil, year: nil, month: nil, day: nil, lat: nil, lng: nil)
+    def initialize(date: nil, year: nil, month: nil, day: nil, lat: nil, lng: nil, tz: nil)
       @lat = lat.to_d.zero? ? TEHRAN_LAT : lat.to_d
       @lng = lng.to_d.zero? ? TEHRAN_LONG : lng.to_d
+      @tz = tz
       if date && date.respond_to?(:to_datetime)
+        @tz ||= date.try(:time_zone) || TEHRAN_TZ
         @gregorian_date = date.to_datetime
         year, month, day = from_gregorian
         @year = Year.new(year)
         @month = Month.new(month)
         @day = Day.new(day)
       elsif year && month && day
+        @tz || TEHRAN_TZ
         @year = Year.new(year)
         @month = Month.new(month)
         @day = Day.new(day)
@@ -44,6 +48,14 @@ module BahaiDate
         fail ArgumentError, 'Invalid arguments. Use a hash with :date or with :year, :month, and :day.'
       end
       @weekday = Weekday.new(weekday_from_gregorian)
+    end
+
+    def sunset_time
+      Logic.sunset_time_for(gregorian_date, lat:, lng:, tz:)
+    end
+
+    def upcoming_sunset_time
+      Logic.sunset_time_for(gregorian_date + 1, lat:, lng:, tz:)
     end
 
     def occasions

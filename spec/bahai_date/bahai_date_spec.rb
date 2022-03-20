@@ -1,5 +1,29 @@
 module BahaiDate
   describe BahaiDate do
+    it 'upcoming sunset time' do
+      denver_time = Time.new(2022, 3, 20, 13, 55, 23, '-06:00')
+      denver_zone = TZInfo::Timezone.get('America/Denver')
+      denver_lat = 39.742043
+      denver_lng = -104.991531
+      expected_upcoming_sunset_time = Time.new(2022, 3, 20, 19, 12, 00, '-06:00')
+      bahai_date = BahaiDate.new(date: denver_time, lat: denver_lat, lng: denver_lng, tz: denver_zone)
+
+      expect(bahai_date.upcoming_sunset_time).to eq(expected_upcoming_sunset_time)
+    end
+
+    it 'sunset time' do
+      denver_time = Time.new(2022, 3, 20, 13, 55, 23, '-06:00')
+      denver_zone = TZInfo::Timezone.get('America/Denver')
+      denver_lat = 39.742043
+      denver_lng = -104.991531
+      expected_sunset_time = Time.new(2022, 3, 19, 19, 11, 00, '-06:00')
+      bahai_date = BahaiDate.new(date: denver_time, lat: denver_lat, lng: denver_lng, tz: denver_zone)
+
+      expect(bahai_date.sunset_time).to eq(expected_sunset_time)
+    end
+
+    #####
+
     it 'can be created from a DateTime' do
       bahai_date = BahaiDate.new(date: DateTime.now)
 
