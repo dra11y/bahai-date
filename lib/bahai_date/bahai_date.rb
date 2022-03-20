@@ -2,17 +2,32 @@ module BahaiDate
   class BahaiDate
     AYYAM_I_HA = -1
 
-    attr_reader :weekday, :day, :month, :year, :gregorian_date
+    # Universal House of Justice Letter: 10 July 2014 - Badi Calendar
+    # https://universalhouseofjustice.bahai.org/activities-bahai-community/20140710_001
+
+    # *** Latitude and longitude for Tehran, Iran ***
+    # Source: http://mynasadata.larc.nasa.gov/latitudelongitude-finder/
+    #         Latitude: 35° 41' 45.9996", Longitude: 51° 25' 23.0016"
+    # Converted to decimal using:
+    #         http://transition.fcc.gov/mb/audio/bickel/DDDMMSS-decimal.html
+    TEHRAN_LAT = BigDecimal('35.696111')
+    TEHRAN_LONG = BigDecimal('51.423056')
+
+    attr_reader :weekday, :day, :month, :year, :gregorian_date, :lat, :lng
 
     def ==(other)
       weekday == other.weekday &&
         day == other.day &&
         month == other.month &&
         year == other.year &&
-        gregorian_date.to_i == other.gregorian_date.to_i
+        gregorian_date.to_i == other.gregorian_date.to_i &&
+        lat == other.lat &&
+        lng == other.lng
     end
 
-    def initialize(date: nil, year: nil, month: nil, day: nil)
+    def initialize(date: nil, year: nil, month: nil, day: nil, lat: nil, lng: nil)
+      @lat = lat.to_d.zero? ? TEHRAN_LAT : lat.to_d
+      @lng = lng.to_d.zero? ? TEHRAN_LONG : lng.to_d
       if date && date.respond_to?(:to_datetime)
         @gregorian_date = date.to_datetime
         year, month, day = from_gregorian

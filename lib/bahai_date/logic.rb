@@ -26,20 +26,26 @@ module BahaiDate
     #         http://www.satsig.net/degrees-minutes-seconds-calculator.htm
     AZIMUTH = 90.833333
 
-    def initialize
+    attr_reader :lat, :lng, :tz
+
+    def initialize(lat:, lng:)
+      raise 'lat is required' if lat.to_d.zero?
+      raise 'lng is required' if lng.to_d.zero?
+      @lat = lat.to_d
+      @lng = lng.to_d
       @tz = TZInfo::Timezone.get('Asia/Tehran')
     end
 
     def self.nawruz_for(year)
-      new.nawruz_date year
+      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).nawruz_date year
     end
 
     def self.leap?(year_bahai_era)
-      new.leap? year_bahai_era
+      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).leap? year_bahai_era
     end
 
     def self.twin_holy_days_date(year_bahai_era)
-      new.twin_holy_days_for year_bahai_era
+      new(lat: TEHRAN_LAT, lng: TEHRAN_LONG).twin_holy_days_for year_bahai_era
     end
 
     def nawruz_date(year)
@@ -55,7 +61,7 @@ module BahaiDate
     end
 
     def sunset_time_for(date)
-      calc = SolarEventCalculator.new(date, TEHRAN_LAT, TEHRAN_LONG)
+      calc = SolarEventCalculator.new(date, lat, lng)
       sunset_time = calc.compute_utc_solar_event(AZIMUTH, false)
       localize(sunset_time.utc)
     end
@@ -100,7 +106,7 @@ module BahaiDate
     private
 
     def localize(time)
-      (@tz.utc_to_local(time)).to_time
+      (tz.utc_to_local(time)).to_time
     end
 
     def increment_if_after_sunset(time)
