@@ -12,7 +12,7 @@ module BahaiDate
     #         http://transition.fcc.gov/mb/audio/bickel/DDDMMSS-decimal.html
     TEHRAN_LAT = BigDecimal('35.696111')
     TEHRAN_LONG = BigDecimal('51.423056')
-    TEHRAN_TZ = 'Asia/Tehran'.freeze
+    TEHRAN_TZ = TZInfo::Timezone.get('Asia/Tehran').freeze
 
     attr_reader :weekday, :day, :month, :year, :gregorian_date, :lat, :lng, :tz
 
@@ -68,6 +68,10 @@ module BahaiDate
 
     def long_format
       "#{@weekday} #{@day.number} #{@month} #{@year.bahai_era} B.E."
+    end
+
+    def long_comma_format
+      "#{@weekday}, #{@day.number} #{@month}, #{@year.bahai_era} B.E."
     end
 
     def short_format
