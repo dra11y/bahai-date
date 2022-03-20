@@ -7,6 +7,10 @@ module BahaiDate
 
     attr_reader :number
 
+    def ==(other)
+      number == other.number
+    end
+
     def initialize(number_arg)
       validate number_arg
       @number = number_arg.to_i

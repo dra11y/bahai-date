@@ -4,17 +4,25 @@ module BahaiDate
 
     attr_reader :weekday, :day, :month, :year, :gregorian_date
 
-    def initialize(params)
-      if params[:date]
-        @gregorian_date = params[:date]
+    def ==(other)
+      weekday == other.weekday &&
+        day == other.day &&
+        month == other.month &&
+        year == other.year &&
+        gregorian_date.to_i == other.gregorian_date.to_i
+    end
+
+    def initialize(date: nil, year: nil, month: nil, day: nil)
+      if date && date.respond_to?(:to_datetime)
+        @gregorian_date = date.to_datetime
         year, month, day = from_gregorian
         @year = Year.new(year)
         @month = Month.new(month)
         @day = Day.new(day)
-      elsif params[:year] && params[:month] && params[:day]
-        @year = Year.new(params[:year])
-        @month = Month.new(params[:month])
-        @day = Day.new(params[:day])
+      elsif year && month && day
+        @year = Year.new(year)
+        @month = Month.new(month)
+        @day = Day.new(day)
         validate_ayyam_i_ha
         @gregorian_date = to_gregorian
       else

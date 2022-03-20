@@ -21,4 +21,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'astro-algo', '~> 0'
   s.add_development_dependency 'rspec', '~> 3'
   s.add_development_dependency 'simplecov', '~> 0'
+  s.add_development_dependency 'activesupport', '~> 7'
+  s.add_development_dependency 'debug'
 end

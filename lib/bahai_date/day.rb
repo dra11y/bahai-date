@@ -7,6 +7,12 @@ module BahaiDate
     attr_reader :number
     attr_accessor :occasions, :weekday
 
+    def ==(other)
+      number == other.number &&
+        weekday == other.weekday &&
+        occasions == other.occasions
+    end
+
     def initialize(number_arg)
       validate number_arg
       @number = number_arg.to_i

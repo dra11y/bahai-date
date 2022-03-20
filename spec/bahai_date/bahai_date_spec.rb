@@ -1,5 +1,52 @@
 module BahaiDate
   describe BahaiDate do
+    it 'can be created from a DateTime' do
+      bahai_date = BahaiDate.new(date: DateTime.now)
+
+      expect(bahai_date).to_not be_nil
+    end
+
+    it 'can be created from an ActiveSupport::TimeWithZone (Time.current)' do
+      bahai_date = BahaiDate.new(date: Time.current)
+
+      expect(bahai_date).to_not be_nil
+    end
+
+    it 'can be created from a Time (Time.now)' do
+      bahai_date = BahaiDate.new(date: Time.now)
+
+      expect(bahai_date).to_not be_nil
+    end
+
+    it 'should be equal to another created from the same date' do
+      current_date = Date.current
+      bahai_date_1 = BahaiDate.new(date: current_date)
+      bahai_date_2 = BahaiDate.new(date: current_date)
+
+      expect(bahai_date_1).to eq(bahai_date_2)
+    end
+
+    it 'should be equal no matter what type of date object was passed in' do
+      time_current = Time.current.beginning_of_day
+      time_now = Time.now.beginning_of_day
+      date_current = Date.current.beginning_of_day
+      datetime_now = DateTime.now.beginning_of_day
+
+      bahai_date_time_current = BahaiDate.new(date: time_current)
+      bahai_date_time_now = BahaiDate.new(date: time_now)
+      bahai_date_date_current = BahaiDate.new(date: date_current)
+      bahai_date_datetime_now = BahaiDate.new(date: datetime_now)
+
+      [
+        bahai_date_time_current,
+        bahai_date_time_now,
+        bahai_date_date_current,
+        bahai_date_datetime_now,
+      ].combination(2).each do |lhs, rhs|
+        expect(lhs).to eq(rhs)
+      end
+    end
+
     it 'can be created from a year, month and day' do
       bahai_date = BahaiDate.new(year: 1, month: 1, day: 1)
 

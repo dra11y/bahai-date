@@ -6,6 +6,14 @@ module BahaiDate
 
     attr_reader :bahai_era, :number, :vahid, :kull_i_shay, :months
 
+    def ==(other)
+      bahai_era == other.bahai_era &&
+        number == other.number &&
+        vahid == other.vahid &&
+        kull_i_shay == other.kull_i_shay &&
+        months == other.months
+    end
+
     def initialize(number_arg)
       validate number_arg
       @bahai_era = number_arg.to_i
